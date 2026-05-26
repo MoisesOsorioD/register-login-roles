@@ -22,18 +22,6 @@
 
     </p>
 
-    <form action="/logout" method="POST">
-
-        @csrf
-
-        <button class="btn btn-danger">
-
-            Cerrar Sesión
-
-        </button>
-
-    </form>
-
 </div>
 
 @endsection
