@@ -2,24 +2,34 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Auth;
+use App\Enums\RoleEnum;
 
-/*
-|--------------------------------------------------------------------------
-| RUTA INICIO
-|--------------------------------------------------------------------------
-*/
-
+// RUTA INICIO
 Route::get('/', function () {
+
     return view('welcome');
+
 });
 
-/*
-|--------------------------------------------------------------------------
-| RUTAS GUEST
-|--------------------------------------------------------------------------
-| Solo usuarios NO autenticados
-*/
 
+// DASHBOARD AUTOMÁTICO
+// Decide dashboard según rol del usuario autenticado
+Route::get('/dashboard', function () {
+
+    if (Auth::user()->role == RoleEnum::PRODUCTOR->value) {
+
+        return redirect('/productor/dashboard');
+
+    }
+
+    return redirect('/cliente/dashboard');
+
+})->middleware('auth.custom');
+
+
+// RUTAS GUEST
+// Solo usuarios NO autenticados pueden acceder a estas rutas
 Route::get('/register', [AuthController::class, 'showRegister'])
     ->middleware('guest.custom');
 
@@ -32,23 +42,22 @@ Route::get('/login', [AuthController::class, 'showLogin'])
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('guest.custom');
 
-/*
-|--------------------------------------------------------------------------
-| DASHBOARD PRODUCTOR
-|--------------------------------------------------------------------------
-*/
 
+// DASHBOARD PRODUCTOR
 Route::get('/productor/dashboard', function () {
 
     return view('productor.dashboard');
 
 })->middleware(['auth.custom', 'role:productor']);
 
-/*
-|--------------------------------------------------------------------------
-| DASHBOARD CLIENTE
-|--------------------------------------------------------------------------
-*/
+
+// DASHBOARD CLIENTE
+Route::get('/cliente/dashboard', function () {
+
+    return view('cliente.dashboard');
+
+})->middleware(['auth.custom', 'role:cliente']);
+
 
 Route::get('/cliente/dashboard', function () {
 
@@ -56,11 +65,7 @@ Route::get('/cliente/dashboard', function () {
 
 })->middleware(['auth.custom', 'role:cliente']);
 
-/*
-|--------------------------------------------------------------------------
-| LOGOUT
-|--------------------------------------------------------------------------
-*/
 
+// LOGOUT
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth.custom');

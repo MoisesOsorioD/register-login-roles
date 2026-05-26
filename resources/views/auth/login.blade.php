@@ -32,9 +32,11 @@
                         >
 
                         @error('email')
+
                             <div class="text-danger mt-1">
                                 {{ $message }}
                             </div>
+
                         @enderror
 
                     </div>
@@ -52,10 +54,30 @@
                         >
 
                         @error('password')
+
                             <div class="text-danger mt-1">
                                 {{ $message }}
                             </div>
+
                         @enderror
+
+                    </div>
+
+                    <div class="mb-3 form-check">
+
+                        <input
+                            type="checkbox"
+                            name="remember"
+                            class="form-check-input"
+                            id="remember"
+                        >
+
+                        <label
+                            class="form-check-label"
+                            for="remember"
+                        >
+                            Recordarme
+                        </label>
 
                     </div>
 

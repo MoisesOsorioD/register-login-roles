@@ -2,31 +2,37 @@
 
 @section('content')
 
-<div class="card shadow">
+<div class="text-center mt-5">
 
-    <div class="card-body">
+    <h1 class="mb-3">
 
-        <h1 class="mb-3">
-            Dashboard Cliente
-        </h1>
+        Dashboard Cliente
 
-        <p>
-            Bienvenido cliente.
-        </p>
+    </h1>
 
-        <form action="/logout" method="POST">
+    <h3 class="mb-4">
 
-            @csrf
+        Bienvenido {{ Auth::user()->name }}
 
-            <button class="btn btn-danger">
+    </h3>
 
-                Cerrar sesión
+    <p class="mb-4">
 
-            </button>
+        Aquí podrás explorar productos agrícolas.
 
-        </form>
+    </p>
 
-    </div>
+    <form action="/logout" method="POST">
+
+        @csrf
+
+        <button class="btn btn-danger">
+
+            Cerrar Sesión
+
+        </button>
+
+    </form>
 
 </div>
 

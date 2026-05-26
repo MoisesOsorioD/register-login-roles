@@ -4,36 +4,32 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Enums\RoleEnum;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | MOSTRAR VISTA REGISTRO
-    |--------------------------------------------------------------------------
-    */
-
+    
+    // MOSTRAR VISTA REGISTRO
     public function showRegister()
     {
         return view('auth.register');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | REGISTRAR USUARIO
-    |--------------------------------------------------------------------------
-    */
 
+    // REGISTRAR USUARIO
     public function register(Request $request)
     {
         $request->validate(
 
             [
                 'name' => 'required',
+
                 'email' => 'required|email|unique:users',
+
                 'password' => 'required|min:6',
-                'role' => 'required'
+
+                'role' => 'required|in:cliente,productor'
             ],
 
             [
@@ -49,7 +45,9 @@ class AuthController extends Controller
 
                 'password.min' => 'La contraseña debe tener mínimo 6 caracteres',
 
-                'role.required' => 'Debes seleccionar un rol'
+                'role.required' => 'Debes seleccionar un rol',
+
+                'role.in' => 'El rol seleccionado no es válido'
             ]
 
         );
@@ -68,36 +66,25 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        if ($user->role == 'productor') {
-            return redirect('/productor/dashboard');
-        }
-
-        return redirect('/cliente/dashboard');
+        return redirect('/dashboard');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MOSTRAR LOGIN
-    |--------------------------------------------------------------------------
-    */
 
+    // MOSTRAR LOGIN
     public function showLogin()
     {
         return view('auth.login');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LOGIN
-    |--------------------------------------------------------------------------
-    */
 
+    // LOGIN
     public function login(Request $request)
     {
         $credentials = $request->validate(
 
             [
                 'email' => 'required|email',
+
                 'password' => 'required'
             ],
 
@@ -111,15 +98,15 @@ class AuthController extends Controller
 
         );
 
-        if (Auth::attempt($credentials)) {
+
+        // REMEMBER ME
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
 
             $request->session()->regenerate();
 
-            if (Auth::user()->role == 'productor') {
-                return redirect('/productor/dashboard');
-            }
-
-            return redirect('/cliente/dashboard');
+            return redirect('/dashboard');
         }
 
         return back()->withErrors([
@@ -129,12 +116,8 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | LOGOUT
-    |--------------------------------------------------------------------------
-    */
 
+    // LOGOUT
     public function logout(Request $request)
     {
         Auth::logout();

@@ -1,256 +1,208 @@
-# Sistema de Login y Registro con Roles en Laravel 13
+# README — Sistema de Login y Registro con Roles en Laravel 13
 
-## 📖 Descripción del Proyecto
+## 📌 Descripción del Proyecto
 
-Este proyecto fue creado con el objetivo de aprender desde cero cómo funciona un sistema de autenticación real en Laravel 13 sin usar ningún starter kit como Breeze o Jetstream.
+Este proyecto es un sistema completo de:
 
-La idea principal fue entender todo manualmente:
+- Registro
+- Login
+- Logout
+- Roles
+- Middleware
+- Protección de rutas
+- Remember Me
+- ENUM para roles
+- Dashboards separados
+- Home pública
+- Errores personalizados
 
-* cómo funciona el registro
-* cómo funciona el login
-* cómo funcionan las sesiones
-* cómo funcionan los roles
-* cómo proteger rutas
-* cómo funciona Blade
-* cómo funcionan los middlewares
-* cómo organizar un proyecto Laravel correctamente
+desarrollado completamente:
 
-El sistema tiene dos roles:
+✅ desde cero  
+✅ sin starter kits  
+✅ sin Breeze  
+✅ sin Jetstream  
+✅ sin paquetes externos
 
-* Cliente
-* Productor Agrícola
-
-Cada usuario:
-
-* puede registrarse
-* puede iniciar sesión
-* tiene su propio dashboard
-* no puede entrar al dashboard del otro rol
-* no puede entrar si no ha iniciado sesión
+Todo fue construido manualmente para aprender cómo funciona realmente la autenticación en Laravel 13.
 
 ---
 
-# 🧠 Objetivo Principal
+# 🎯 Objetivo del Proyecto
 
-Aprender Laravel entendiendo todo el proceso internamente.
+El objetivo fue aprender:
 
-NO usar herramientas automáticas.
-
-NO copiar código sin entender.
-
-Construir una base sólida.
-
----
-
-# ⚙️ Tecnologías Utilizadas
-
-| Tecnología  | Uso                    |
-| ----------- | ---------------------- |
-| Laravel 13  | Framework backend      |
-| PHP         | Lenguaje principal     |
-| Blade       | Sistema de vistas      |
-| Bootstrap 5 | Diseño visual          |
-| MySQL       | Base de datos          |
-| Middleware  | Protección de rutas    |
-| Eloquent    | Manejo de modelos y BD |
+- cómo funciona Laravel internamente
+- cómo crear autenticación manual
+- cómo proteger rutas
+- cómo manejar sesiones
+- cómo funcionan los middleware
+- cómo trabajar con Blade
+- cómo separar usuarios por roles
+- cómo organizar un proyecto correctamente
 
 ---
 
-# 📁 Estructura Principal del Proyecto
+# 🛠 Tecnologías Utilizadas
+
+- PHP 8+
+- Laravel 13
+- Blade
+- Bootstrap 5 (CDN)
+- MySQL
+- Composer
+
+---
+
+# 📂 Estructura General del Proyecto
 
 ```text
 app/
- ├── Http/
- │    ├── Controllers/
- │    │     └── AuthController.php
- │    └── Middleware/
- │          ├── AuthMiddleware.php
- │          ├── GuestMiddleware.php
- │          └── RoleMiddleware.php
- │
- ├── Models/
- │     └── User.php
- │
+│
+├── Enums/
+│   └── RoleEnum.php
+│
+├── Http/
+│   ├── Controllers/
+│   │   └── AuthController.php
+│   │
+│   └── Middleware/
+│       ├── AuthMiddleware.php
+│       ├── GuestMiddleware.php
+│       └── RoleMiddleware.php
+│
 resources/
- └── views/
-      ├── auth/
-      │     ├── login.blade.php
-      │     └── register.blade.php
-      │
-      ├── cliente/
-      │     └── dashboard.blade.php
-      │
-      ├── productor/
-      │     └── dashboard.blade.php
-      │
-      └── layouts/
-            └── app.blade.php
-
+│
+├── views/
+│   ├── auth/
+│   │   ├── login.blade.php
+│   │   └── register.blade.php
+│   │
+│   ├── cliente/
+│   │   └── dashboard.blade.php
+│   │
+│   ├── productor/
+│   │   └── dashboard.blade.php
+│   │
+│   ├── errors/
+│   │   ├── 403.blade.php
+│   │   └── 404.blade.php
+│   │
+│   ├── layouts/
+│   │   └── app.blade.php
+│   │
+│   └── welcome.blade.php
+│
 routes/
- └── web.php
+│   └── web.php
 ```
 
 ---
 
-# 🚀 FASE 1 — Sistema de Registro
+# 📚 FASE 1 — Crear Proyecto Laravel
+
+## Crear proyecto
+
+```bash
+composer create-project laravel/laravel register-login
+```
 
 ---
 
-# 🧠 ¿Qué es el registro?
+# 📚 FASE 2 — Configurar Base de Datos
 
-El registro es el proceso donde un usuario:
+Editar:
 
-* escribe sus datos
-* se guarda en la base de datos
-* crea una cuenta
+```text
+.env
+```
 
----
+Ejemplo:
 
-# 📌 Objetivo
-
-Permitir que:
-
-* Cliente se registre
-* Productor se registre
-
-Y dependiendo del rol:
-
-* redirigir a dashboards diferentes
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=register_login
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
 ---
 
-# 📌 Rutas de Registro
+# Ejecutar migraciones
+
+```bash
+php artisan migrate
+```
+
+---
+
+# 📚 FASE 3 — Agregar Campo Role
+
+## Crear migración
+
+```bash
+php artisan make:migration add_role_to_users_table
+```
+
+---
+
+# Agregar columna
+
+```php
+$table->string('role');
+```
+
+---
+
+# Ejecutar migración
+
+```bash
+php artisan migrate
+```
+
+---
+
+# 📚 FASE 4 — Configurar Modelo User
 
 Archivo:
 
 ```text
-routes/web.php
+app/Models/User.php
 ```
 
-Se crearon rutas:
+## Agregar Fillable
 
 ```php
-Route::get('/register', [AuthController::class, 'showRegister']);
-
-Route::post('/register', [AuthController::class, 'register']);
+#[Fillable(['name', 'email', 'password', 'role'])]
 ```
 
 ---
 
-# 🧠 Explicación
+# 📚 FASE 5 — Crear AuthController
 
-## GET
+## Crear controlador
 
-Muestra el formulario.
-
----
-
-## POST
-
-Procesa los datos enviados.
-
----
-
-# 📌 Vista de Registro
-
-Archivo:
-
-```text
-resources/views/auth/register.blade.php
-```
-
-Se creó un formulario con:
-
-* nombre
-* correo
-* contraseña
-* rol
-
----
-
-# 📌 Validación
-
-Antes de guardar datos:
-
-Laravel valida:
-
-* campos vacíos
-* correo válido
-* correo repetido
-* contraseña mínima
-
----
-
-# 📌 Crear Usuario
-
-Se usó:
-
-```php
-User::create()
-```
-
-para guardar usuario en base de datos.
-
----
-
-# 📌 Roles
-
-Se agregó campo:
-
-```text
-role
-```
-
-con dos valores:
-
-* cliente
-* productor
-
----
-
-# 📌 Redirección por Rol
-
-Después del registro:
-
-```php
-if ($user->role == 'productor')
-```
-
-Laravel decide:
-
-* dashboard productor
-* dashboard cliente
-
----
-
-# 🔐 FASE 2 — Login
-
----
-
-# 🧠 ¿Qué es login?
-
-Login significa:
-
-verificar si un usuario ya existe.
-
-Laravel compara:
-
-* correo
-* contraseña
-
----
-
-# 📌 Rutas Login
-
-```php
-Route::get('/login', [AuthController::class, 'showLogin']);
-
-Route::post('/login', [AuthController::class, 'login']);
+```bash
+php artisan make:controller AuthController
 ```
 
 ---
 
-# 📌 Vista Login
+# Funciones creadas
+
+- showRegister()
+- register()
+- showLogin()
+- login()
+- logout()
+
+---
+
+# 📚 FASE 6 — Crear Formularios Blade
+
+## Login
 
 Archivo:
 
@@ -258,362 +210,179 @@ Archivo:
 resources/views/auth/login.blade.php
 ```
 
-Formulario:
-
-* correo
-* contraseña
-
 ---
 
-# 📌 Auth::attempt()
-
-Se utilizó:
-
-```php
-Auth::attempt($credentials)
-```
-
-Laravel automáticamente:
-
-* busca email
-* compara contraseña
-* crea sesión
-
----
-
-# 📌 Sesiones
-
-Cuando login es correcto:
-
-Laravel crea una sesión.
-
-La sesión permite saber:
-
-```text
-quién está autenticado
-```
-
----
-
-# 📌 regenerate()
-
-```php
-$request->session()->regenerate();
-```
-
-Genera nueva sesión por seguridad.
-
----
-
-# 🔓 FASE 3 — Logout
-
----
-
-# 🧠 ¿Qué es logout?
-
-Cerrar sesión.
-
-Eliminar autenticación actual.
-
----
-
-# 📌 Ruta Logout
-
-```php
-Route::post('/logout', [AuthController::class, 'logout']);
-```
-
----
-
-# 📌 Auth::logout()
-
-```php
-Auth::logout();
-```
-
-Laravel elimina usuario autenticado.
-
----
-
-# 📌 invalidate()
-
-```php
-$request->session()->invalidate();
-```
-
-Destruye sesión actual.
-
----
-
-# 🛡️ FASE 4 — Middlewares
-
----
-
-# 🧠 ¿Qué es un Middleware?
-
-Un middleware funciona como:
-
-```text
-un guardia de seguridad
-```
-
-Antes de entrar a una ruta:
-
-* verifica condiciones
-* decide si puede pasar
-
----
-
-# 📌 Middlewares creados
-
-## AuthMiddleware
-
-Verifica:
-
-```text
-si hay login
-```
-
----
-
-## GuestMiddleware
-
-Verifica:
-
-```text
-si NO hay login
-```
-
-Evita entrar a:
-
-* login
-* register
-
-si ya inició sesión.
-
----
-
-## RoleMiddleware
-
-Verifica:
-
-```text
-qué rol tiene el usuario
-```
-
----
-
-# 📌 Protección de Rutas
-
-Ejemplo:
-
-```php
-->middleware(['auth.custom', 'role:productor'])
-```
-
-Primero:
-
-* verifica login
-
-Luego:
-
-* verifica rol
-
----
-
-# 📌 Resultado
-
-## Cliente
-
-NO puede entrar:
-
-```text
-/productor/dashboard
-```
-
----
-
-## Productor
-
-NO puede entrar:
-
-```text
-/cliente/dashboard
-```
-
----
-
-## Usuario NO autenticado
-
-NO puede entrar a dashboards.
-
----
-
-# 🎨 FASE 5 — Blade y Layouts
-
----
-
-# 🧠 ¿Qué es Blade?
-
-Blade es el sistema de vistas de Laravel.
-
-Permite:
-
-* reutilizar HTML
-* organizar vistas
-* escribir código limpio
-
----
-
-# 📌 Layout Principal
+## Registro
 
 Archivo:
 
 ```text
-resources/views/layouts/app.blade.php
+resources/views/auth/register.blade.php
 ```
-
-Contiene:
-
-* navbar
-* estructura HTML
-* Bootstrap
 
 ---
 
-# 📌 @extends
+# 📚 FASE 7 — Crear Middleware
+
+## Middleware Auth
+
+Protege rutas privadas.
+
+```bash
+php artisan make:middleware AuthMiddleware
+```
+
+---
+
+## Middleware Guest
+
+Evita entrar a login/register si ya hay sesión.
+
+```bash
+php artisan make:middleware GuestMiddleware
+```
+
+---
+
+## Middleware Role
+
+Protege dashboards por rol.
+
+```bash
+php artisan make:middleware RoleMiddleware
+```
+
+---
+
+# 📚 FASE 8 — Remember Me
+
+## Objetivo
+
+Mantener sesión iniciada incluso cerrando navegador.
+
+---
+
+# Agregar checkbox
 
 ```blade
-@extends('layouts.app')
+<input type="checkbox" name="remember">
 ```
 
-Permite heredar layout principal.
-
 ---
 
-# 📌 @yield
+# En login()
 
-```blade
-@yield('content')
+```php
+$remember = $request->has('remember');
+
+Auth::attempt($credentials, $remember);
 ```
 
-Es un espacio donde cada vista inserta contenido.
-
 ---
 
-# 📌 @section
+# 📚 FASE 9 — ENUM para Roles
 
-```blade
-@section('content')
+## Crear carpeta
+
+```text
+app/Enums
 ```
 
-Define contenido que irá dentro del yield.
-
 ---
 
-# 🎨 FASE 6 — Bootstrap
+# Crear ENUM
 
----
+Archivo:
 
-# 🧠 ¿Qué es Bootstrap?
-
-Framework CSS.
-
-Sirve para:
-
-* diseños rápidos
-* formularios bonitos
-* navbar
-* botones
-* cards
-
----
-
-# 📌 Bootstrap CDN
-
-Se utilizó CDN porque:
-
-* más simple
-* no requiere Vite
-* no requiere npm
-* ideal para aprender Laravel primero
-
----
-
-# 📌 Navbar Bootstrap
-
-Se creó una navbar con:
-
-* Login
-* Registro
-* Logout
-* Nombre usuario
-* Rol
-
----
-
-# 📌 Cards
-
-Se utilizaron:
-
-```html
-<div class="card">
+```text
+app/Enums/RoleEnum.php
 ```
 
-para crear contenedores visuales.
-
 ---
 
-# 📌 form-control
+# Código
 
-Clase Bootstrap para inputs bonitos.
+```php
+enum RoleEnum: string
+{
+    case CLIENTE = 'cliente';
 
----
-
-# 📌 btn btn-success
-
-Clase Bootstrap para botones verdes.
-
----
-
-# 🎯 FASE 7 — Navbar Inteligente
-
----
-
-# 🧠 Objetivo
-
-Cambiar navbar automáticamente dependiendo:
-
-* si hay login
-* si no hay login
-
----
-
-# 📌 @guest
-
-```blade
-@guest
+    case PRODUCTOR = 'productor';
+}
 ```
 
-Muestra contenido SOLO si NO hay login.
+---
+
+# Beneficios
+
+✅ evita errores  
+✅ más profesional  
+✅ más limpio  
+✅ más mantenible
 
 ---
 
-# 📌 @auth
+# 📚 FASE 10 — Dashboard Automático
 
-```blade
-@auth
+## Nueva ruta
+
+```text
+/dashboard
 ```
 
-Muestra contenido SOLO si hay login.
+---
+
+# Función
+
+Detecta automáticamente:
+
+- cliente
+- productor
+
+y redirige al dashboard correcto.
 
 ---
 
-# 📌 Auth::user()
+# Beneficio
 
-Devuelve usuario autenticado.
+Centralizar lógica.
 
-Ejemplo:
+---
+
+# 📚 FASE 11 — Home Pública
+
+Archivo:
+
+```text
+resources/views/welcome.blade.php
+```
+
+---
+
+# Funciones
+
+## Si NO hay login
+
+Mostrar:
+
+- Login
+- Registro
+
+---
+
+## Si SÍ hay login
+
+Mostrar:
+
+- Dashboard
+- Logout
+- Nombre usuario
+
+---
+
+# 📚 FASE 12 — Dashboards Dinámicos
+
+Mostrar:
 
 ```blade
 {{ Auth::user()->name }}
@@ -621,265 +390,331 @@ Ejemplo:
 
 ---
 
-# 📌 Resultado Final Navbar
+# Resultado
 
-## Usuario invitado
+```text
+Bienvenido Moises
+```
 
-Ve:
+---
 
-* Login
-* Registro
+# 📚 FASE 13 — Error 403 Personalizado
+
+Archivo:
+
+```text
+resources/views/errors/403.blade.php
+```
+
+---
+
+# Función
+
+Mostrar página bonita cuando usuario intenta entrar donde no debe.
+
+---
+
+# Ejemplo
+
+Cliente entrando a:
+
+```text
+/productor/dashboard
+```
+
+---
+
+# 📚 FASE 14 — Error 404 Personalizado
+
+Archivo:
+
+```text
+resources/views/errors/404.blade.php
+```
+
+---
+
+# Función
+
+Mostrar página bonita cuando ruta no existe.
+
+---
+
+# 📚 FASE 15 — Navbar Profesional
+
+Archivo:
+
+```text
+resources/views/layouts/app.blade.php
+```
+
+---
+
+# Funciones
+
+## Usuario NO autenticado
+
+Mostrar:
+
+- Inicio
+- Login
+- Registro
 
 ---
 
 ## Usuario autenticado
 
-Ve:
+Mostrar:
 
-* nombre
-* rol
-* logout
+- Dashboard
+- Nombre usuario
+- Logout
 
 ---
 
-# 📌 Dashboards
+# 📚 Middleware Utilizados
 
-Se crearon vistas:
+| Middleware | Función |
+|---|---|
+| auth.custom | proteger rutas privadas |
+| guest.custom | evitar login/register si ya autenticado |
+| role | proteger rutas por rol |
+
+---
+
+# 📚 Roles del Sistema
+
+| Rol | Función |
+|---|---|
+| cliente | acceder dashboard cliente |
+| productor | acceder dashboard productor |
+
+---
+
+# 📚 Seguridad Implementada
+
+✅ protección rutas  
+✅ middleware auth  
+✅ middleware guest  
+✅ middleware role  
+✅ validaciones  
+✅ remember me  
+✅ sesiones  
+✅ password hashing automático Laravel 13
+
+---
+
+# 📚 Password Hashing
+
+Laravel 13 ya incluye:
+
+```php
+'password' => 'hashed'
+```
+
+---
+
+# Esto significa
+
+Laravel automáticamente:
+
+✅ encripta contraseña  
+✅ usa hashing seguro  
+✅ NO guarda texto plano
+
+---
+
+# 📚 Sistema de Rutas
+
+## Públicas
 
 ```text
-resources/views/productor/dashboard.blade.php
-resources/views/cliente/dashboard.blade.php
+/
+```
+
+```text
+/login
+```
+
+```text
+/register
 ```
 
 ---
 
-# 📌 Arquitectura Mejorada
+# Privadas
 
-ANTES:
+```text
+/dashboard
+```
 
-```php
-return '<h1>Dashboard</h1>';
+```text
+/cliente/dashboard
+```
+
+```text
+/productor/dashboard
 ```
 
 ---
 
-AHORA:
-
-```php
-return view('productor.dashboard');
-```
-
-Mucho más profesional.
-
----
-
-# 🧠 Conceptos Aprendidos
-
----
-
-# Laravel
-
-* rutas
-* controladores
-* vistas
-* middleware
-* modelos
-* autenticación
-* sesiones
-
----
-
-# Blade
-
-* layouts
-* extends
-* sections
-* yield
-* auth
-* guest
-* error
-
----
-
-# Bootstrap
-
-* navbar
-* cards
-* formularios
-* grid
-* botones
-
----
-
-# Seguridad
-
-* sesiones
-* middleware
-* roles
-* protección rutas
-* validaciones
-
----
-
-# 🛡️ Seguridad Implementada
-
-✅ Protección de rutas
-
-✅ Protección por roles
-
-✅ Logout seguro
-
-✅ Validaciones
-
-✅ Password hash automático
-
-✅ Protección CSRF
-
----
-
-# 📌 Middleware Finales
-
-| Middleware   | Función                             |
-| ------------ | ----------------------------------- |
-| auth.custom  | verificar login                     |
-| guest.custom | bloquear login/register autenticado |
-| role         | verificar rol                       |
-
----
-
-# 📌 Roles Finales
-
-| Rol       | Permisos            |
-| --------- | ------------------- |
-| cliente   | dashboard cliente   |
-| productor | dashboard productor |
-
----
-
-# 📌 Flujo Final del Sistema
+# 📚 Flujo Completo del Sistema
 
 ## Registro
 
-Usuario:
-
-* llena formulario
-* selecciona rol
-* se guarda en BD
-* inicia sesión automáticamente
-* redirige dashboard correspondiente
-
----
-
-## Login
-
-Usuario:
-
-* escribe correo
-* escribe contraseña
-* Laravel verifica datos
-* crea sesión
-* redirige dashboard
+```text
+Usuario
+↓
+Formulario registro
+↓
+Validación
+↓
+Crear usuario
+↓
+Login automático
+↓
+/dashboard
+↓
+Dashboard según rol
+```
 
 ---
 
-## Logout
+# Login
 
-Usuario:
-
-* presiona logout
-* Laravel elimina sesión
-* redirige login
-
----
-
-# 📚 Archivos Importantes
-
-| Archivo             | Función                             |
-| ------------------- | ----------------------------------- |
-| web.php             | rutas                               |
-| AuthController.php  | lógica auth                         |
-| User.php            | modelo usuario                      |
-| app.blade.php       | layout principal                    |
-| login.blade.php     | formulario login                    |
-| register.blade.php  | formulario registro                 |
-| AuthMiddleware.php  | proteger rutas privadas             |
-| GuestMiddleware.php | bloquear login/register autenticado |
-| RoleMiddleware.php  | verificar roles                     |
+```text
+Usuario
+↓
+Formulario login
+↓
+Validación
+↓
+Auth::attempt()
+↓
+Sesión iniciada
+↓
+/dashboard
+↓
+Dashboard correcto
+```
 
 ---
 
-# 🎯 Resultado Final
+# 📚 Clonar Proyecto desde GitHub
 
-Se construyó completamente desde cero:
+Repositorio oficial:
 
-✅ Sistema de registro
-
-✅ Sistema login
-
-✅ Logout
-
-✅ Roles
-
-✅ Protección rutas
-
-✅ Dashboards separados
-
-✅ Bootstrap
-
-✅ Navbar dinámica
-
-✅ Middleware profesional
-
-✅ Blade organizado
-
-✅ Arquitectura limpia
+https://github.com/MoisesOsorioD/register-login
 
 ---
 
-# 🧠 Lo Más Importante Aprendido
+# 🔥 PASO 1 — Clonar repositorio
 
-El objetivo NO fue solamente hacer un login.
-
-El objetivo fue entender:
-
-* cómo Laravel autentica usuarios
-* cómo funcionan las sesiones
-* cómo funcionan los middlewares
-* cómo se protegen rutas
-* cómo funcionan los roles
-* cómo organizar un proyecto correctamente
+```bash
+git clone https://github.com/MoisesOsorioD/register-login.git
+```
 
 ---
 
-# 🚀 Próximos Pasos Posibles
+# 🔥 PASO 2 — Entrar al proyecto
 
-Aunque el sistema ya está completo para autenticación con roles, las siguientes mejoras posibles serían:
-
-* CRUD
-* Relaciones Eloquent
-* Roles dinámicos
-* Permisos
-* Policies
-* Gates
-* Arquitectura avanzada
-* Panel administrativo completo
+```bash
+cd register-login
+```
 
 ---
 
-# 👨‍💻 Autor
+# 🔥 PASO 3 — Instalar dependencias
 
-Proyecto desarrollado con fines educativos para aprender Laravel 13 desde cero entendiendo internamente:
-
-* autenticación
-* middleware
-* Blade
-* Bootstrap
-* roles
-* sesiones
-* arquitectura básica
+```bash
+composer install
+```
 
 ---
 
-# 🌱 Fin del Proyecto Base
+# 🔥 PASO 4 — Crear archivo .env
 
-Sistema completo de autenticación con roles realizado manualmente en Laravel 13.
+```bash
+cp .env.example .env
+```
+
+---
+
+# 🔥 PASO 5 — Generar APP_KEY
+
+```bash
+php artisan key:generate
+```
+
+---
+
+# 🔥 PASO 6 — Configurar Base de Datos
+
+Editar:
+
+```text
+.env
+```
+
+---
+
+# 🔥 PASO 7 — Ejecutar migraciones
+
+```bash
+php artisan migrate
+```
+
+---
+
+# 🔥 PASO 8 — Levantar servidor
+
+```bash
+php artisan serve
+```
+
+---
+
+# Abrir navegador
+
+```text
+http://127.0.0.1:8000
+```
+
+---
+
+# 📚 Lo Aprendido en Este Proyecto
+
+✅ autenticación manual  
+✅ sesiones  
+✅ middleware  
+✅ roles  
+✅ rutas protegidas  
+✅ Blade  
+✅ Bootstrap  
+✅ ENUM  
+✅ validaciones  
+✅ arquitectura básica Laravel  
+✅ organización proyecto  
+✅ navegación  
+✅ errores personalizados  
+✅ remember me  
+✅ dashboards dinámicos
+
+---
+
+# 📚 Resultado Final
+
+Este proyecto terminó siendo un sistema completo de autenticación con roles hecho manualmente desde cero en Laravel 13.
+
+El objetivo principal NO fue solo “hacer login”.
+
+El verdadero objetivo fue comprender:
+
+- cómo Laravel maneja autenticación
+- cómo funcionan las sesiones
+- cómo proteger rutas
+- cómo funcionan los middleware
+- cómo separar usuarios por roles
+- cómo estructurar correctamente un proyecto Laravel
+
+---

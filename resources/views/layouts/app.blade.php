@@ -1,3 +1,7 @@
+@php
+    use Illuminate\Support\Facades\Auth;
+@endphp
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -7,11 +11,10 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>AgroSistema</title>
+    <title>Sistema Agrícola</title>
 
-    <!-- Bootstrap CSS CDN -->
-    <link 
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
         rel="stylesheet"
     >
 
@@ -19,80 +22,91 @@
 
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-success">
+    <!-- NAVBAR -->
 
-    <div class="container">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
 
-        <a class="navbar-brand" href="/">
-            AgroSistema
-        </a>
+        <div class="container">
 
-        <div>
+            <a
+                class="navbar-brand fw-bold"
+                href="/"
+            >
+                Sistema Agrícola
+            </a>
 
-            @guest
+            <div class="d-flex align-items-center">
 
-                <a 
-                    href="/login"
-                    class="btn btn-light me-2"
+                <a
+                    href="/"
+                    class="btn btn-outline-light me-2"
                 >
-                    Login
+                    Inicio
                 </a>
 
-                <a 
-                    href="/register"
-                    class="btn btn-warning"
-                >
-                    Registro
-                </a>
+                @guest
 
-            @endguest
+                    <a
+                        href="/login"
+                        class="btn btn-light me-2"
+                    >
+                        Login
+                    </a>
 
-            @auth
+                    <a
+                        href="/register"
+                        class="btn btn-warning"
+                    >
+                        Registro
+                    </a>
 
-                <span class="text-white me-3">
+                @endguest
 
-                    {{ Auth::user()->name }}
+                @auth
 
-                    |
+                    <a
+                        href="/dashboard"
+                        class="btn btn-light me-2"
+                    >
+                        Dashboard
+                    </a>
 
-                    {{ Auth::user()->role }}
+                    <span class="text-white me-3">
 
-                </span>
+                        {{ Auth::user()->name }}
 
-                <form 
-                    action="/logout"
-                    method="POST"
-                    class="d-inline"
-                >
+                    </span>
 
-                    @csrf
+                    <form
+                        action="/logout"
+                        method="POST"
+                    >
 
-                    <button class="btn btn-danger">
+                        @csrf
 
-                        Logout
+                        <button class="btn btn-danger">
 
-                    </button>
+                            Logout
 
-                </form>
+                        </button>
 
-            @endauth
+                    </form>
+
+                @endauth
+
+            </div>
 
         </div>
 
-    </div>
+    </nav>
 
-</nav>
+    <!-- CONTENIDO -->
 
-    <main class="container mt-5">
+    <div class="container mt-5">
 
         @yield('content')
 
-    </main>
-
-    <!-- Bootstrap JS CDN -->
-    <script 
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-    </script>
+    </div>
 
 </body>
 
