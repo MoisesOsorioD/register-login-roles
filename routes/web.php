@@ -1,11 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Http\Request;
+
+use App\Http\Controllers\AuthController;
 use App\Enums\RoleEnum;
 
-// RUTA INICIO
+//  INICIO
 Route::get('/', function () {
 
     return view('welcome');
@@ -14,7 +17,6 @@ Route::get('/', function () {
 
 
 // DASHBOARD AUTOMÁTICO
-// Decide dashboard según rol del usuario autenticado
 Route::get('/dashboard', function () {
 
     if (Auth::user()->role == RoleEnum::PRODUCTOR->value) {
@@ -29,18 +31,112 @@ Route::get('/dashboard', function () {
 
 
 // RUTAS GUEST
-// Solo usuarios NO autenticados pueden acceder a estas rutas
-Route::get('/register', [AuthController::class, 'showRegister'])
-    ->middleware('guest.custom');
+// Solo usuarios NO autenticados 
+Route::middleware('guest.custom')->group(function () {
 
-Route::post('/register', [AuthController::class, 'register'])
-    ->middleware('guest.custom');
+    //  REGISTRO
+    Route::get('/register', [AuthController::class, 'showRegister']);
 
-Route::get('/login', [AuthController::class, 'showLogin'])
-    ->middleware('guest.custom');
+    Route::post('/register', [AuthController::class, 'register']);
 
-Route::post('/login', [AuthController::class, 'login'])
-    ->middleware('guest.custom');
+
+    // LOGIN
+    Route::get('/login', [AuthController::class, 'showLogin']);
+
+    Route::post('/login', [AuthController::class, 'login']);
+
+
+    // RECUPERAR CONTRASEÑA
+    // FORMULARIO OLVIDÉ MI CONTRASEÑA
+    Route::get('/forgot-password', function () {
+
+        return view('auth.forgot-password');
+
+    })->name('password.request');
+
+
+    // ENVIAR CORREO
+    Route::post('/forgot-password', function (Request $request) {
+
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+
+            ? back()->with(['status' => __($status)])
+
+            : back()->withErrors([
+                'email' => __($status)
+            ]);
+
+    })->name('password.email');
+
+
+    // FORMULARIO NUEVA CONTRASEÑA
+    Route::get('/reset-password/{token}', function (string $token) {
+
+        return view('auth.reset-password', [
+
+            'token' => $token
+
+        ]);
+
+    })->name('password.reset');
+
+
+    // GUARDAR NUEVA CONTRASEÑA
+    Route::post('/reset-password', function (Request $request) {
+
+        $request->validate([
+
+            'token' => 'required',
+
+            'email' => 'required|email',
+
+            'password' => 'required|min:6|confirmed'
+
+        ]);
+
+        $status = Password::reset(
+
+            $request->only(
+                'email',
+                'password',
+                'password_confirmation',
+                'token'
+            ),
+
+            function ($user, $password) {
+
+                $user->forceFill([
+
+                    'password' => bcrypt($password)
+
+                ])->save();
+
+            }
+
+        );
+
+        return $status === Password::PASSWORD_RESET
+
+            ? redirect('/login')->with(
+                'status',
+                'Contraseña actualizada correctamente'
+            )
+
+            : back()->withErrors([
+                'email' => [__($status)]
+            ]);
+
+    })->name('password.update');
+
+});
 
 
 // DASHBOARD PRODUCTOR
@@ -52,13 +148,6 @@ Route::get('/productor/dashboard', function () {
 
 
 // DASHBOARD CLIENTE
-Route::get('/cliente/dashboard', function () {
-
-    return view('cliente.dashboard');
-
-})->middleware(['auth.custom', 'role:cliente']);
-
-
 Route::get('/cliente/dashboard', function () {
 
     return view('cliente.dashboard');

@@ -8,15 +8,21 @@
 
         <div class="card shadow">
 
-            <div class="card-body">
+            <div class="card-body p-4">
 
                 <h2 class="mb-4">
-                    Login
+                    Nueva Contraseña
                 </h2>
 
-                <form action="/login" method="POST">
+                <form action="/reset-password" method="POST">
 
                     @csrf
+
+                    <input
+                        type="hidden"
+                        name="token"
+                        value="{{ $token }}"
+                    >
 
                     <div class="mb-3">
 
@@ -34,17 +40,19 @@
                         @error('email')
 
                             <div class="text-danger mt-1">
+
                                 {{ $message }}
+
                             </div>
 
                         @enderror
 
                     </div>
 
-                    <div class="mb-4">
+                    <div class="mb-3">
 
                         <label class="form-label">
-                            Contraseña
+                            Nueva Contraseña
                         </label>
 
                         <input
@@ -56,40 +64,32 @@
                         @error('password')
 
                             <div class="text-danger mt-1">
+
                                 {{ $message }}
+
                             </div>
 
                         @enderror
 
                     </div>
 
-                    <div class="mb-3 form-check">
+                    <div class="mb-4">
 
-                        <input
-                            type="checkbox"
-                            name="remember"
-                            class="form-check-input"
-                            id="remember"
-                        >
-
-                        <label
-                            class="form-check-label"
-                            for="remember"
-                        >
-                            Recordarme
+                        <label class="form-label">
+                            Confirmar Contraseña
                         </label>
 
-                    </div>
+                        <input
+                            type="password"
+                            name="password_confirmation"
+                            class="form-control"
+                        >
 
-                    <div class="mb-4">
-                        <a href="/forgot-password">
-                            ¿Olvidaste tu contraseña?
-                        </a>
                     </div>
 
                     <button class="btn btn-success w-100">
 
-                        Iniciar Sesión
+                        Cambiar contraseña
 
                     </button>
 

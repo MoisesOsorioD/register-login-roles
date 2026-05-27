@@ -15,6 +15,8 @@ Este proyecto es un sistema completo de:
 - Dashboards separados
 - Home pública
 - Errores personalizados
+- Recuperación de contraseña
+- Envío de correos con Mailtrap
 
 desarrollado completamente:
 
@@ -40,6 +42,8 @@ El objetivo fue aprender:
 - cómo trabajar con Blade
 - cómo separar usuarios por roles
 - cómo organizar un proyecto correctamente
+- cómo funciona recuperación de contraseña
+- cómo funciona el envío de correos SMTP
 
 ---
 
@@ -51,6 +55,7 @@ El objetivo fue aprender:
 - Bootstrap 5 (CDN)
 - MySQL
 - Composer
+- Mailtrap
 
 ---
 
@@ -76,7 +81,9 @@ resources/
 ├── views/
 │   ├── auth/
 │   │   ├── login.blade.php
-│   │   └── register.blade.php
+│   │   ├── register.blade.php
+│   │   ├── forgot-password.blade.php
+│   │   └── reset-password.blade.php
 │   │
 │   ├── cliente/
 │   │   └── dashboard.blade.php
@@ -472,6 +479,108 @@ Mostrar:
 
 ---
 
+# 📚 FASE 16 — Recuperar Contraseña
+
+## Objetivo
+
+Permitir que un usuario pueda recuperar su contraseña mediante correo electrónico.
+
+Laravel ya trae internamente gran parte del sistema preparado.
+
+En este proyecto se implementó manualmente para comprender cómo funciona realmente.
+
+---
+
+# Nuevas vistas agregadas
+
+```text
+resources/views/auth/forgot-password.blade.php
+```
+
+```text
+resources/views/auth/reset-password.blade.php
+```
+
+---
+
+# Nuevas funcionalidades
+
+✅ recuperar contraseña  
+✅ generar token seguro  
+✅ envío de correo  
+✅ formulario nueva contraseña  
+✅ actualización segura contraseña
+
+---
+
+# Configuración SMTP
+
+Se utilizó Mailtrap para pruebas locales.
+
+---
+
+# Variables agregadas al .env
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=TU_USERNAME
+MAIL_PASSWORD=TU_PASSWORD
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="test@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+---
+
+# Flujo recuperación contraseña
+
+```text
+Usuario
+↓
+/forgot-password
+↓
+Ingresa correo
+↓
+Laravel genera token
+↓
+Correo enviado
+↓
+Usuario abre enlace
+↓
+/reset-password/{token}
+↓
+Nueva contraseña
+↓
+Contraseña actualizada
+↓
+Login nuevamente
+```
+
+---
+
+# Tabla utilizada
+
+Laravel utiliza:
+
+```text
+password_reset_tokens
+```
+
+---
+
+# Seguridad implementada
+
+✅ token temporal  
+✅ validación email  
+✅ confirmación contraseña  
+✅ token seguro Laravel  
+✅ contraseña encriptada  
+✅ middleware guest
+
+---
+
 # 📚 Middleware Utilizados
 
 | Middleware | Función |
@@ -500,7 +609,10 @@ Mostrar:
 ✅ validaciones  
 ✅ remember me  
 ✅ sesiones  
-✅ password hashing automático Laravel 13
+✅ password hashing automático Laravel 13  
+✅ recuperación de contraseña  
+✅ tokens temporales  
+✅ envío de correos SMTP
 
 ---
 
@@ -538,6 +650,14 @@ Laravel automáticamente:
 
 ```text
 /register
+```
+
+```text
+/forgot-password
+```
+
+```text
+/reset-password/{token}
 ```
 
 ---
@@ -600,13 +720,27 @@ Dashboard correcto
 
 ---
 
-# 📚 Clonar Proyecto desde GitHub
+# Recuperar contraseña
 
-Repositorio oficial:
-
-https://github.com/MoisesOsorioD/register-login
+```text
+Usuario
+↓
+Olvidó contraseña
+↓
+/forgot-password
+↓
+Correo recuperación
+↓
+Token temporal
+↓
+Nueva contraseña
+↓
+Login nuevamente
+```
 
 ---
+
+# 📚 Clonar Proyecto desde GitHub
 
 # 🔥 PASO 1 — Clonar repositorio
 
@@ -658,7 +792,24 @@ Editar:
 
 ---
 
-# 🔥 PASO 7 — Ejecutar migraciones
+# 🔥 PASO 7 — Configurar Mailtrap
+
+Agregar en `.env`:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=TU_USERNAME
+MAIL_PASSWORD=TU_PASSWORD
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="test@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+---
+
+# 🔥 PASO 8 — Ejecutar migraciones
 
 ```bash
 php artisan migrate
@@ -666,7 +817,7 @@ php artisan migrate
 
 ---
 
-# 🔥 PASO 8 — Levantar servidor
+# 🔥 PASO 9 — Levantar servidor
 
 ```bash
 php artisan serve
@@ -698,7 +849,11 @@ http://127.0.0.1:8000
 ✅ navegación  
 ✅ errores personalizados  
 ✅ remember me  
-✅ dashboards dinámicos
+✅ dashboards dinámicos  
+✅ recuperación de contraseña  
+✅ envío de correos SMTP  
+✅ Mailtrap  
+✅ tokens temporales
 
 ---
 
@@ -716,5 +871,7 @@ El verdadero objetivo fue comprender:
 - cómo funcionan los middleware
 - cómo separar usuarios por roles
 - cómo estructurar correctamente un proyecto Laravel
+- cómo funciona recuperación de contraseña
+- cómo funciona envío de correos SMTP
 
 ---
